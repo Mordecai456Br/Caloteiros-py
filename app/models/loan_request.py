@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class LoanStatus(str, enum.Enum):
+class LoanRequestStatus(str, enum.Enum):
     PENDING = "pending"
     APPROVED = "approved"
     DENIED = "denied"
@@ -74,17 +74,17 @@ class LoanRequest(Base):
         Text,
         nullable=True,
     )
-    status: Mapped[LoanStatus] = mapped_column(
+    status: Mapped[LoanRequestStatus] = mapped_column(
         "status",
         SqlEnum(
-            LoanStatus,
-            name="loan_status",
+            LoanRequestStatus,
+            name="loan_request_status",
             create_type=False,
             values_callable=lambda obj: [e.value for e in obj],
         ),
         nullable=False,
-        default=LoanStatus.PENDING,
-        server_default=text("'pending'::loan_status"),
+        default=LoanRequestStatus.PENDING,
+        server_default=text("'pending'::loan_request_status"),
     )
     created_at: Mapped[datetime] = mapped_column(
         "created_at",
