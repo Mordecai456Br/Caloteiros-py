@@ -1,21 +1,16 @@
-<<<<<<< Updated upstream
 import logging
 
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
-=======
-from fastapi import APIRouter
->>>>>>> Stashed changes
 
 from app.core.database import check_database_connection
+from app.core.exceptions import DatabaseConnectionError
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/health", tags=["Health"])
 
-
 @router.get("")
 def health_check():
-<<<<<<< Updated upstream
     try:
         check_database_connection()
         return {
@@ -32,10 +27,3 @@ def health_check():
                 "detail": "Erro ao conectar com o banco de dados.",
             },
         )
-=======
-    check_database_connection()
-    return {
-        "status": "ok",
-        "database": "connected",
-    }
->>>>>>> Stashed changes
