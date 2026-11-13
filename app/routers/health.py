@@ -9,7 +9,6 @@ from app.core.exceptions import DatabaseConnectionError
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/health", tags=["Health"])
 
-
 @router.get("")
 def health_check():
     try:
