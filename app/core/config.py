@@ -7,10 +7,10 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     DEBUG: bool = True
 
-    DB_HOST: str = "db.hlcbbucomceymrcoqecp.supabase.co"
+    DB_HOST: str = "aws-0-us-east-1.pooler.supabase.com"
     DB_PORT: int = 5432
     DB_NAME: str = "postgres"
-    DB_USER: str = "postgres"
+    DB_USER: str = "postgres.hlcbbucomceymrcoqecp"
     DB_PASSWORD: str = ""
     DATABASE_URL: str | None = None
 
