@@ -1,10 +1,14 @@
 from collections.abc import Generator
+import logging
+
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.core.config import settings
 from app.core.exceptions import DatabaseConnectionError
+
+logger = logging.getLogger(__name__)
 
 engine = create_engine(
     settings.sqlalchemy_database_uri,
@@ -36,6 +40,7 @@ def check_database_connection() -> bool:
             connection.execute(text("SELECT 1"))
         return True
     except SQLAlchemyError as exc:
+        logger.error("Falha interna de conexão com o banco de dados: %s", exc)
         raise DatabaseConnectionError(
-            f"Falha ao conectar ao banco de dados Supabase: {exc}"
+            "Banco de dados indisponível no momento."
         ) from exc
