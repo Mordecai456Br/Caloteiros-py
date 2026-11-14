@@ -13,7 +13,14 @@ import uvicorn
 from app.core.config import settings
 from app.core.database import check_database_connection
 from app.core.exceptions import AppException, DatabaseConnectionError
-from app.routers import health, installments, loan_requests, loans, payments, users
+from app.routers import (
+    health,
+    installments,
+    loan_requests,
+    loans,
+    payments,
+    users,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -51,9 +58,12 @@ def _error_response(
 async def lifespan(app: FastAPI):
     try:
         check_database_connection()
-        logger.info("Conexão com o banco de dados Supabase estabelecida com sucesso!")
+        logger.info("Conexão com o banco Supabase estabelecida com sucesso!")
     except DatabaseConnectionError as exc:
-        logger.error("Não foi possível conectar ao banco na inicialização: %s", exc.message)
+        logger.error(
+            "Não foi possível conectar ao banco na inicialização: %s",
+            exc.message,
+        )
     yield
 
 
@@ -84,7 +94,9 @@ async def request_context_middleware(request: Request, call_next):
 
 
 @app.exception_handler(AppException)
-async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
+async def app_exception_handler(
+    request: Request, exc: AppException
+) -> JSONResponse:
     return _error_response(
         status_code=exc.status_code,
         code=exc.code,
@@ -98,7 +110,9 @@ async def http_exception_handler(
     request: Request, exc: StarletteHTTPException
 ) -> JSONResponse:
     code = HTTP_STATUS_CODE_MAP.get(exc.status_code, "HTTP_ERROR")
-    message = exc.detail if isinstance(exc.detail, str) else "Erro na requisição."
+    message = (
+        exc.detail if isinstance(exc.detail, str) else "Erro na requisição."
+    )
     details = exc.detail if not isinstance(exc.detail, str) else None
     return _error_response(
         status_code=exc.status_code,
@@ -168,7 +182,9 @@ async def sqlalchemy_error_handler(
 
 
 @app.exception_handler(Exception)
-async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+async def unhandled_exception_handler(
+    request: Request, exc: Exception
+) -> JSONResponse:
     logger.exception("Erro inesperado não tratado: %s", exc)
     return _error_response(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

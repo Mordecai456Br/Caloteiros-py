@@ -68,17 +68,14 @@ class PaymentRepository:
                 Installment, Payment.installment_id == Installment.id
             ).where(Installment.loan_id == loan_id)
 
+        effective_date = func.coalesce(
+            Payment.received_at, func.date(Payment.created_at)
+        )
         if start_date is not None:
-            stmt = stmt.where(
-                func.coalesce(Payment.received_at, func.date(Payment.created_at))
-                >= start_date
-            )
+            stmt = stmt.where(effective_date >= start_date)
 
         if end_date is not None:
-            stmt = stmt.where(
-                func.coalesce(Payment.received_at, func.date(Payment.created_at))
-                <= end_date
-            )
+            stmt = stmt.where(effective_date <= end_date)
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total = self.db.scalar(count_stmt) or 0

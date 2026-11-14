@@ -1,2 +1,23 @@
+# Ambientes virtuais e caches Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.cache/
+
+# Variáveis de ambiente
 .env
-*.pyc
+
+# Pacotes e artefatos de build/testes
+dist/
+build/
+*.egg-info/
+report.xml
+.coverage
+htmlcov/
+
+# IDEs
+.idea/
+.vscode/

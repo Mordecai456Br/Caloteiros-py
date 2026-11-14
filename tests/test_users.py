@@ -62,11 +62,19 @@ def test_list_users_returns_registered_users(client: TestClient) -> None:
 def test_list_users_filters_by_name_and_search(client: TestClient) -> None:
     client.post(
         "/users",
-        json={"name": "Maria Oliveira", "phone": "11911111111", "email": "maria@x.com"},
+        json={
+            "name": "Maria Oliveira",
+            "phone": "11911111111",
+            "email": "maria@x.com",
+        },
     )
     client.post(
         "/users",
-        json={"name": "Pedro Santos", "phone": "21999990000", "email": "pedro@x.com"},
+        json={
+            "name": "Pedro Santos",
+            "phone": "21999990000",
+            "email": "pedro@x.com",
+        },
     )
 
     by_name = client.get("/users?name=Maria")
@@ -127,7 +135,9 @@ def test_get_user_by_id_invalid_uuid(client: TestClient) -> None:
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-def test_update_user_partial_fields(client: TestClient, created_user: dict) -> None:
+def test_update_user_partial_fields(
+    client: TestClient, created_user: dict
+) -> None:
     response = client.patch(
         f"/users/{created_user['id']}",
         json={"name": "Maria Silva Atualizada"},

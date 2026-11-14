@@ -6,7 +6,9 @@ from fastapi.testclient import TestClient
 # ==========================================
 # POST /loan-requests
 # ==========================================
-def test_create_loan_request_success(client: TestClient, created_user: dict) -> None:
+def test_create_loan_request_success(
+    client: TestClient, created_user: dict
+) -> None:
     response = client.post(
         "/loan-requests",
         json={
@@ -102,11 +104,15 @@ def test_list_loan_requests_filter_by_status(
 def test_list_loan_requests_filter_by_date_range(
     client: TestClient, created_loan_request: dict
 ) -> None:
-    valid = client.get("/loan-requests?start_date=2020-01-01&end_date=2030-12-31")
+    valid = client.get(
+        "/loan-requests?start_date=2020-01-01&end_date=2030-12-31"
+    )
     assert valid.status_code == 200
     assert valid.json()["pagination"]["total"] == 1
 
-    invalid = client.get("/loan-requests?start_date=2026-12-31&end_date=2026-01-01")
+    invalid = client.get(
+        "/loan-requests?start_date=2026-12-31&end_date=2026-01-01"
+    )
     assert invalid.status_code == 422
     assert invalid.json()["error"]["code"] == "VALIDATION_ERROR"
 
@@ -127,7 +133,6 @@ def test_approve_loan_request_creates_loan_and_installments_automatically(
     assert data["status"] == "approved"
     assert data["approved_at"] is not None
 
-    # Verifica que o Loan foi criado automaticamente com status 'open'
     loans_resp = client.get("/loans")
     assert loans_resp.status_code == 200
     loans = loans_resp.json()["items"]
@@ -136,7 +141,6 @@ def test_approve_loan_request_creates_loan_and_installments_automatically(
     assert loans[0]["status"] == "open"
     assert float(loans[0]["total_to_receive"]) == 1200.00
 
-    # Verifica que as 2 parcelas foram geradas automaticamente
     inst_resp = client.get(f"/installments?loan_id={loans[0]['id']}")
     assert inst_resp.status_code == 200
     installments = inst_resp.json()["items"]
@@ -145,7 +149,9 @@ def test_approve_loan_request_creates_loan_and_installments_automatically(
     assert float(installments[1]["amount"]) == 600.00
 
 
-def test_approve_nonexistent_loan_request_returns_404(client: TestClient) -> None:
+def test_approve_nonexistent_loan_request_returns_404(
+    client: TestClient,
+) -> None:
     response = client.patch(f"/loan-requests/{uuid.uuid4()}/approve")
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "RESOURCE_NOT_FOUND"

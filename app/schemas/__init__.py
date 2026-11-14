@@ -1,4 +1,9 @@
-from app.schemas.common import ErrorBody, ErrorResponse, PaginatedResponse, PaginationMeta
+from app.schemas.common import (
+    ErrorBody,
+    ErrorResponse,
+    PaginatedResponse,
+    PaginationMeta,
+)
 from app.schemas.installment import (
     InstallmentBase,
     InstallmentCreate,

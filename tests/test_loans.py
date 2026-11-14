@@ -6,7 +6,9 @@ from fastapi.testclient import TestClient
 # ==========================================
 # POST /loans
 # ==========================================
-def test_create_loan_valid(client: TestClient, created_loan_request: dict) -> None:
+def test_create_loan_valid(
+    client: TestClient, created_loan_request: dict
+) -> None:
     response = client.post(
         "/loans",
         json={

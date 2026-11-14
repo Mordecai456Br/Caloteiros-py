@@ -21,7 +21,7 @@ class LoanRequestCreate(LoanRequestBase):
 
 
 class LoanRequestUpdate(BaseModel):
-    """Atualização dos dados da solicitação (status é alterado apenas via /approve ou /deny)."""
+    """Atualização dos dados da solicitação (status via /approve ou /deny)."""
 
     request_amount: Decimal | None = Field(default=None, gt=0)
     pix_key: str | None = None
@@ -31,7 +31,7 @@ class LoanRequestUpdate(BaseModel):
 
 
 class LoanRequestApprovePayload(BaseModel):
-    """Parâmetros opcionais para personalizar o Loan criado no momento da aprovação."""
+    """Parâmetros opcionais para o Loan criado no momento da aprovação."""
 
     total_to_receive: Decimal | None = Field(default=None, gt=0)
     load_date: date | None = None

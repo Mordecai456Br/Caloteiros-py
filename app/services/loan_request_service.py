@@ -57,7 +57,9 @@ class LoanRequestService:
     def get_loan_request(self, request_id: uuid.UUID) -> LoanRequest:
         loan_request = self.loan_request_repo.get_by_id(request_id)
         if not loan_request:
-            raise NotFoundException("Solicitação de empréstimo não encontrada.")
+            raise NotFoundException(
+                "Solicitação de empréstimo não encontrada."
+            )
         return loan_request
 
     def list_loan_requests(
@@ -74,7 +76,7 @@ class LoanRequestService:
     ) -> PaginatedResponse[LoanRequestResponse]:
         if start_date and end_date and start_date > end_date:
             raise ValidationException(
-                "A data inicial (start_date) deve ser anterior ou igual à data final (end_date)."
+                "start_date deve ser anterior ou igual a end_date."
             )
 
         items, total = self.loan_request_repo.list_filtered(
@@ -89,7 +91,9 @@ class LoanRequestService:
         )
         return PaginatedResponse[LoanRequestResponse](
             items=[LoanRequestResponse.model_validate(item) for item in items],
-            pagination=PaginationMeta.create(page=page, limit=limit, total=total),
+            pagination=PaginationMeta.create(
+                page=page, limit=limit, total=total
+            ),
         )
 
     def update_loan_request(
@@ -98,7 +102,7 @@ class LoanRequestService:
         loan_request = self.get_loan_request(request_id)
         if loan_request.status != LoanRequestStatus.PENDING:
             raise BusinessRuleException(
-                "Não é permitido atualizar uma solicitação que já foi aprovada ou negada."
+                "Não é permitido atualizar solicitação já aprovada ou negada."
             )
 
         update_data = payload.model_dump(exclude_unset=True)

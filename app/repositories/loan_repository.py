@@ -33,7 +33,9 @@ class LoanRepository:
         stmt = select(Loan).where(Loan.id == loan_id)
         return self.db.scalar(stmt)
 
-    def get_by_loan_request_id(self, loan_request_id: uuid.UUID) -> Loan | None:
+    def get_by_loan_request_id(
+        self, loan_request_id: uuid.UUID
+    ) -> Loan | None:
         stmt = select(Loan).where(Loan.loan_request_id == loan_request_id)
         return self.db.scalar(stmt)
 
@@ -54,9 +56,9 @@ class LoanRepository:
         stmt = select(Loan)
 
         if user_id is not None:
-            stmt = stmt.join(LoanRequest, Loan.loan_request_id == LoanRequest.id).where(
-                LoanRequest.user_id == user_id
-            )
+            stmt = stmt.join(
+                LoanRequest, Loan.loan_request_id == LoanRequest.id
+            ).where(LoanRequest.user_id == user_id)
 
         if status is not None:
             if status == LoanFilterStatus.ACTIVE:
@@ -93,7 +95,12 @@ class LoanRepository:
         return items, total
 
     def list_all(self, skip: int = 0, limit: int = 100) -> list[Loan]:
-        stmt = select(Loan).offset(skip).limit(limit).order_by(Loan.load_date.desc())
+        stmt = (
+            select(Loan)
+            .offset(skip)
+            .limit(limit)
+            .order_by(Loan.load_date.desc())
+        )
         return list(self.db.scalars(stmt).all())
 
     def update(self, loan: Loan) -> Loan:

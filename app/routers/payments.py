@@ -13,7 +13,9 @@ from app.services.payment_service import PaymentService
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
 
-@router.post("", response_model=PaymentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=PaymentResponse, status_code=status.HTTP_201_CREATED
+)
 def create_payment(payload: PaymentCreate, db: Session = Depends(get_db)):
     service = PaymentService(db)
     return service.create_payment(payload)
@@ -41,7 +43,10 @@ def list_payments(
     ),
     page: int = Query(default=1, ge=1, description="Página atual"),
     limit: int = Query(
-        default=20, ge=1, le=100, description="Quantidade de registros por página"
+        default=20,
+        ge=1,
+        le=100,
+        description="Quantidade de registros por página",
     ),
     db: Session = Depends(get_db),
 ):

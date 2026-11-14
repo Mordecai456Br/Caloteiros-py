@@ -1,4 +1,11 @@
-from app.routers import health, installments, loan_requests, loans, payments, users
+from app.routers import (
+    health,
+    installments,
+    loan_requests,
+    loans,
+    payments,
+    users,
+)
 
 __all__ = [
     "health",
@@ -8,4 +15,3 @@ __all__ = [
     "installments",
     "payments",
 ]
-

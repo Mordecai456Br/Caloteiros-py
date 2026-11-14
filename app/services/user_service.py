@@ -45,7 +45,7 @@ class UserService:
     ) -> PaginatedResponse[UserResponse]:
         if start_date and end_date and start_date > end_date:
             raise ValidationException(
-                "A data inicial (start_date) deve ser anterior ou igual à data final (end_date)."
+                "start_date deve ser anterior ou igual a end_date."
             )
 
         items, total = self.user_repo.list_filtered(
@@ -60,7 +60,9 @@ class UserService:
         )
         return PaginatedResponse[UserResponse](
             items=[UserResponse.model_validate(item) for item in items],
-            pagination=PaginationMeta.create(page=page, limit=limit, total=total),
+            pagination=PaginationMeta.create(
+                page=page, limit=limit, total=total
+            ),
         )
 
     def update_user(self, user_id: uuid.UUID, payload: UserUpdate) -> User:

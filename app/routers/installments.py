@@ -24,7 +24,7 @@ def list_installments(
     ),
     status: InstallmentFilterStatus | None = Query(
         default=None,
-        description="Filtrar por status da parcela (open, partially_paid, paid, pending, overdue)",
+        description="Status (open, partially_paid, paid, pending, overdue)",
     ),
     start_date: date | None = Query(
         default=None, description="Data inicial de vencimento (inclusiva)"
@@ -32,15 +32,18 @@ def list_installments(
     end_date: date | None = Query(
         default=None, description="Data final de vencimento (inclusiva)"
     ),
-    sort_by: Literal["due_date", "number", "amount", "created_at", "status"] = Query(
-        default="due_date", description="Campo de ordenação"
-    ),
+    sort_by: Literal[
+        "due_date", "number", "amount", "created_at", "status"
+    ] = Query(default="due_date", description="Campo de ordenação"),
     order: Literal["asc", "desc"] = Query(
         default="asc", description="Direção da ordenação"
     ),
     page: int = Query(default=1, ge=1, description="Página atual"),
     limit: int = Query(
-        default=20, ge=1, le=100, description="Quantidade de registros por página"
+        default=20,
+        ge=1,
+        le=100,
+        description="Quantidade de registros por página",
     ),
     db: Session = Depends(get_db),
 ):

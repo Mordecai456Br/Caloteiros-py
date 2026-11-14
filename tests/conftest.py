@@ -43,12 +43,16 @@ TestingSessionLocal = sessionmaker(
 
 
 @pytest.fixture(autouse=True)
-def setup_test_database(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+def setup_test_database(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Generator[None, None, None]:
     """Recria as tabelas em um banco isolado antes de cada teste."""
     Base.metadata.drop_all(bind=test_engine)
     Base.metadata.create_all(bind=test_engine)
 
-    monkeypatch.setattr(health_router, "check_database_connection", lambda: True)
+    monkeypatch.setattr(
+        health_router, "check_database_connection", lambda: True
+    )
     monkeypatch.setattr("app.main.check_database_connection", lambda: True)
 
     yield
