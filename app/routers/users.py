@@ -13,7 +13,9 @@ from app.services.user_service import UserService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+)
 def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     service = UserService(db)
     return service.create_user(payload)
@@ -21,7 +23,9 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
 
 @router.get("", response_model=PaginatedResponse[UserResponse])
 def list_users(
-    name: str | None = Query(default=None, description="Filtrar pelo nome da pessoa"),
+    name: str | None = Query(
+        default=None, description="Filtrar pelo nome da pessoa"
+    ),
     search: str | None = Query(
         default=None, description="Busca textual em nome, telefone ou e-mail"
     ),
@@ -39,7 +43,10 @@ def list_users(
     ),
     page: int = Query(default=1, ge=1, description="Página atual"),
     limit: int = Query(
-        default=20, ge=1, le=100, description="Quantidade de registros por página"
+        default=20,
+        ge=1,
+        le=100,
+        description="Quantidade de registros por página",
     ),
     db: Session = Depends(get_db),
 ):

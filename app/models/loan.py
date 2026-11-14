@@ -76,7 +76,7 @@ class Loan(Base):
         ),
         nullable=False,
         default=LoanStatus.OPEN,
-        server_default=text("'open'::loan_status"),
+        server_default="open",
     )
 
     loan_request: Mapped[LoanRequest] = relationship(

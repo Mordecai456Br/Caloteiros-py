@@ -40,17 +40,23 @@ class LoanService:
         self.payment_repo = PaymentRepository(db)
 
     def create_loan(self, payload: LoanCreate) -> Loan:
-        loan_request = self.loan_request_repo.get_by_id(payload.loan_request_id)
+        loan_request = self.loan_request_repo.get_by_id(
+            payload.loan_request_id
+        )
         if not loan_request:
-            raise NotFoundException("Solicitação de empréstimo não encontrada.")
+            raise NotFoundException(
+                "Solicitação de empréstimo não encontrada."
+            )
 
         if loan_request.status == LoanRequestStatus.DENIED:
             raise BusinessRuleException(
-                "Não é permitido criar um empréstimo a partir de uma solicitação negada."
+                "Não é permitido criar empréstimo para solicitação negada."
             )
 
-        existing_loan = self.loan_repo.get_by_loan_request_id(payload.loan_request_id)
-        if existing_loan:
+        existing = self.loan_repo.get_by_loan_request_id(
+            payload.loan_request_id
+        )
+        if existing:
             raise ConflictException(
                 "Já existe um empréstimo registrado para esta solicitação."
             )
@@ -76,12 +82,14 @@ class LoanService:
         )
         loan = self.loan_repo.create(loan)
 
-        installment_count = payload.installment_count or loan_request.installment_count
+        inst_count = (
+            payload.installment_count or loan_request.installment_count
+        )
         first_due_date = payload.first_due_date or loan_request.first_due_date
-        if installment_count and installment_count >= 1:
+        if inst_count and inst_count >= 1:
             self.generate_installments(
                 loan=loan,
-                installment_count=int(installment_count),
+                installment_count=int(inst_count),
                 first_due_date=first_due_date,
             )
 
@@ -100,15 +108,16 @@ class LoanService:
             )
 
         start_due_date = first_due_date or _add_months(loan.load_date, 1)
-        base_amount = (loan.total_to_receive / Decimal(installment_count)).quantize(
+        count_dec = Decimal(installment_count)
+        base_amount = (loan.total_to_receive / count_dec).quantize(
             Decimal("0.01"), rounding=ROUND_DOWN
         )
         if base_amount <= 0:
             raise BusinessRuleException(
-                "O valor das parcelas geradas não pode ser menor ou igual a zero."
+                "O valor das parcelas não pode ser menor ou igual a zero."
             )
 
-        remainder = loan.total_to_receive - (base_amount * Decimal(installment_count))
+        remainder = loan.total_to_receive - (base_amount * count_dec)
         installments: list[Installment] = []
 
         for idx in range(installment_count):
@@ -166,7 +175,10 @@ class LoanService:
     def _determine_initial_status(
         *, amount_received: Decimal, total_to_receive: Decimal
     ) -> LoanStatus:
-        if amount_received >= total_to_receive and total_to_receive > Decimal("0.00"):
+        if (
+            amount_received >= total_to_receive
+            and total_to_receive > Decimal("0.00")
+        ):
             return LoanStatus.PAID
         if amount_received > Decimal("0.00"):
             return LoanStatus.IN_PROGRESS
@@ -194,7 +206,7 @@ class LoanService:
     ) -> PaginatedResponse[LoanResponse]:
         if start_date and end_date and start_date > end_date:
             raise ValidationException(
-                "A data inicial (start_date) deve ser anterior ou igual à data final (end_date)."
+                "start_date deve ser anterior ou igual a end_date."
             )
 
         if (
@@ -203,7 +215,7 @@ class LoanService:
             and min_amount > max_amount
         ):
             raise ValidationException(
-                "O valor mínimo (min_amount) deve ser menor ou igual ao valor máximo (max_amount)."
+                "min_amount deve ser menor ou igual a max_amount."
             )
 
         items, total = self.loan_repo.list_filtered(
@@ -220,5 +232,7 @@ class LoanService:
         )
         return PaginatedResponse[LoanResponse](
             items=[LoanResponse.model_validate(item) for item in items],
-            pagination=PaginationMeta.create(page=page, limit=limit, total=total),
+            pagination=PaginationMeta.create(
+                page=page, limit=limit, total=total
+            ),
         )

@@ -22,7 +22,9 @@ router = APIRouter(prefix="/loan-requests", tags=["Loan Requests"])
 @router.post(
     "", response_model=LoanRequestResponse, status_code=status.HTTP_201_CREATED
 )
-def create_loan_request(payload: LoanRequestCreate, db: Session = Depends(get_db)):
+def create_loan_request(
+    payload: LoanRequestCreate, db: Session = Depends(get_db)
+):
     service = LoanRequestService(db)
     return service.create_loan_request(payload)
 
@@ -49,7 +51,10 @@ def list_loan_requests(
     ),
     page: int = Query(default=1, ge=1, description="Página atual"),
     limit: int = Query(
-        default=20, ge=1, le=100, description="Quantidade de registros por página"
+        default=20,
+        ge=1,
+        le=100,
+        description="Quantidade de registros por página",
     ),
     db: Session = Depends(get_db),
 ):

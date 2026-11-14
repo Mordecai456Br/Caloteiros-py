@@ -16,7 +16,6 @@ from sqlalchemy import (
     Integer,
     Numeric,
     func,
-    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -39,9 +38,10 @@ class Installment(Base):
 
     id: Mapped[int] = mapped_column(
         "id",
-        BigInteger,
+        BigInteger().with_variant(Integer, "sqlite"),
         Identity(always=True),
         primary_key=True,
+        autoincrement=True,
     )
     loan_id: Mapped[uuid.UUID] = mapped_column(
         "loanId",
@@ -80,7 +80,7 @@ class Installment(Base):
         ),
         nullable=False,
         default=InstallmentStatus.OPEN,
-        server_default=text("'open'::installments_status"),
+        server_default="open",
     )
 
     loan: Mapped[Loan] = relationship("Loan", back_populates="installments")

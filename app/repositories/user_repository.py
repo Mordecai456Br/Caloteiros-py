@@ -85,7 +85,12 @@ class UserRepository:
         return items, total
 
     def list_all(self, skip: int = 0, limit: int = 100) -> list[User]:
-        stmt = select(User).offset(skip).limit(limit).order_by(User.created_at.desc())
+        stmt = (
+            select(User)
+            .offset(skip)
+            .limit(limit)
+            .order_by(User.created_at.desc())
+        )
         return list(self.db.scalars(stmt).all())
 
     def update(self, user: User) -> User:

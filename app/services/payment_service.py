@@ -31,7 +31,10 @@ class PaymentService:
         if not installment:
             raise NotFoundException("Parcela não encontrada.")
 
-        if payload.loan_id is not None and installment.loan_id != payload.loan_id:
+        if (
+            payload.loan_id is not None
+            and installment.loan_id != payload.loan_id
+        ):
             raise BusinessRuleException(
                 "A parcela informada não pertence ao empréstimo especificado."
             )
@@ -42,14 +45,19 @@ class PaymentService:
             )
 
         if installment.status == InstallmentStatus.PAID:
-            raise BusinessRuleException("Esta parcela já está totalmente paga.")
-
-        already_paid = self.payment_repo.get_total_paid_for_installment(installment.id)
-        remaining_balance = installment.amount - already_paid
-
-        if payload.amount > remaining_balance:
             raise BusinessRuleException(
-                f"O valor do pagamento ({payload.amount:.2f}) não pode ser maior que o saldo da parcela ({remaining_balance:.2f})."
+                "Esta parcela já está totalmente paga."
+            )
+
+        already_paid = self.payment_repo.get_total_paid_for_installment(
+            installment.id
+        )
+        remaining = installment.amount - already_paid
+
+        if payload.amount > remaining:
+            raise BusinessRuleException(
+                f"O pagamento ({payload.amount:.2f}) excede o saldo "
+                f"da parcela ({remaining:.2f})."
             )
 
         payment = Payment(
@@ -85,7 +93,7 @@ class PaymentService:
     ) -> PaginatedResponse[PaymentResponse]:
         if start_date and end_date and start_date > end_date:
             raise ValidationException(
-                "A data inicial (start_date) deve ser anterior ou igual à data final (end_date)."
+                "start_date deve ser anterior ou igual a end_date."
             )
 
         items, total = self.payment_repo.list_filtered(
@@ -100,7 +108,9 @@ class PaymentService:
         )
         return PaginatedResponse[PaymentResponse](
             items=[PaymentResponse.model_validate(item) for item in items],
-            pagination=PaginationMeta.create(page=page, limit=limit, total=total),
+            pagination=PaginationMeta.create(
+                page=page, limit=limit, total=total
+            ),
         )
 
     def delete_payment(self, payment_id: uuid.UUID) -> None:
@@ -112,12 +122,12 @@ class PaymentService:
             self._sync_installment_and_loan(installment)
 
     def _sync_installment_and_loan(self, installment: Installment) -> None:
-        total_paid_installment = self.payment_repo.get_total_paid_for_installment(
+        total_paid = self.payment_repo.get_total_paid_for_installment(
             installment.id
         )
-        if total_paid_installment >= installment.amount:
+        if total_paid >= installment.amount:
             installment.status = InstallmentStatus.PAID
-        elif total_paid_installment > Decimal("0.00"):
+        elif total_paid > Decimal("0.00"):
             installment.status = InstallmentStatus.PARTIALLY_PAID
         else:
             installment.status = InstallmentStatus.OPEN

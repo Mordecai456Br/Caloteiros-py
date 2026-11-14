@@ -14,7 +14,9 @@ from app.services.loan_service import LoanService
 router = APIRouter(prefix="/loans", tags=["Loans"])
 
 
-@router.post("", response_model=LoanResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "", response_model=LoanResponse, status_code=status.HTTP_201_CREATED
+)
 def create_loan(payload: LoanCreate, db: Session = Depends(get_db)):
     service = LoanService(db)
     return service.create_loan(payload)
@@ -27,7 +29,7 @@ def list_loans(
     ),
     status: LoanFilterStatus | None = Query(
         default=None,
-        description="Filtrar por status do empréstimo (open, in progress, paid, active)",
+        description="Filtrar por status (open, in progress, paid, active)",
     ),
     start_date: date | None = Query(
         default=None, description="Data inicial do empréstimo (inclusiva)"
@@ -53,7 +55,10 @@ def list_loans(
     ),
     page: int = Query(default=1, ge=1, description="Página atual"),
     limit: int = Query(
-        default=20, ge=1, le=100, description="Quantidade de registros por página"
+        default=20,
+        ge=1,
+        le=100,
+        description="Quantidade de registros por página",
     ),
     db: Session = Depends(get_db),
 ):

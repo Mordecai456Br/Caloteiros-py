@@ -27,7 +27,9 @@ class InstallmentRepository:
         self.db.refresh(installment)
         return installment
 
-    def create_many(self, installments: list[Installment]) -> list[Installment]:
+    def create_many(
+        self, installments: list[Installment]
+    ) -> list[Installment]:
         self.db.add_all(installments)
         self.db.commit()
         for installment in installments:
@@ -56,17 +58,15 @@ class InstallmentRepository:
             stmt = stmt.where(Installment.loan_id == loan_id)
 
         if status is not None:
+            pending_statuses = [
+                InstallmentStatus.OPEN,
+                InstallmentStatus.PARTIALLY_PAID,
+            ]
             if status == InstallmentFilterStatus.PENDING:
-                stmt = stmt.where(
-                    Installment.status.in_(
-                        [InstallmentStatus.OPEN, InstallmentStatus.PARTIALLY_PAID]
-                    )
-                )
+                stmt = stmt.where(Installment.status.in_(pending_statuses))
             elif status == InstallmentFilterStatus.OVERDUE:
                 stmt = stmt.where(
-                    Installment.status.in_(
-                        [InstallmentStatus.OPEN, InstallmentStatus.PARTIALLY_PAID]
-                    ),
+                    Installment.status.in_(pending_statuses),
                     Installment.due_date < date.today(),
                 )
             else:

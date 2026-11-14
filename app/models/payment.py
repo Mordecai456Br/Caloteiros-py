@@ -5,7 +5,16 @@ from decimal import Decimal
 from typing import TYPE_CHECKING
 import uuid
 
-from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Numeric, Text, func, text
+from sqlalchemy import (
+    BigInteger,
+    Date,
+    DateTime,
+    ForeignKey,
+    Numeric,
+    Text,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

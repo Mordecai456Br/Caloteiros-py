@@ -11,4 +11,3 @@ __all__ = [
     "InstallmentRepository",
     "PaymentRepository",
 ]
-
