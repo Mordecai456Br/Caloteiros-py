@@ -17,13 +17,18 @@ def health_check():
             "status": "ok",
             "database": "connected",
         }
-    except DatabaseConnectionError:
+    except DatabaseConnectionError as exc:
         logger.exception("Database health check failed")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={
                 "status": "error",
                 "database": "disconnected",
-                "detail": "Erro ao conectar com o banco de dados.",
+                "detail": exc.message,
+                "error": {
+                    "code": exc.code,
+                    "message": exc.message,
+                    "details": exc.details,
+                },
             },
         )

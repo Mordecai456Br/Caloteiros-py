@@ -84,7 +84,7 @@ class LoanRequest(Base):
         ),
         nullable=False,
         default=LoanRequestStatus.PENDING,
-        server_default=text("'pending'::loan_request_status"),
+        server_default="pending",
     )
     created_at: Mapped[datetime] = mapped_column(
         "created_at",

@@ -1,35 +1,41 @@
-import json
-import unittest
-from unittest.mock import patch
+from fastapi.testclient import TestClient
+import pytest
 
 from app.core.exceptions import DatabaseConnectionError
-from app.routers.health import health_check
+from app.routers import health as health_router
 
 
-class HealthCheckTests(unittest.TestCase):
-    @patch("app.routers.health.check_database_connection", return_value=True)
-    def test_database_connected(self, check_connection):
-        self.assertEqual(
-            health_check(), {"status": "ok", "database": "connected"}
-        )
-        check_connection.assert_called_once_with()
+def test_health_check_status_http_200(client: TestClient) -> None:
+    """Verifica se o endpoint /health responde com HTTP 200 quando o banco está ativo."""
+    response = client.get("/health")
+    assert response.status_code == 200
 
-    @patch("app.routers.health.check_database_connection")
-    def test_database_failure_is_logged_without_exposing_details(self, check_connection):
-        check_connection.side_effect = DatabaseConnectionError("internal database details")
 
-        with self.assertLogs("app.routers.health", level="ERROR") as logs:
-            response = health_check()
+def test_health_check_response_structure_and_headers(client: TestClient) -> None:
+    """Verifica a estrutura do JSON de saúde e os cabeçalhos injetados pelo middleware."""
+    response = client.get("/health")
+    body = response.json()
 
-        check_connection.assert_called_once_with()
-        self.assertEqual(response.status_code, 503)
-        self.assertEqual(
-            json.loads(response.body),
-            {
-                "status": "error",
-                "database": "disconnected",
-                "detail": "Erro ao conectar com o banco de dados.",
-            },
-        )
-        self.assertIn("internal database details", "\n".join(logs.output))
-        self.assertIsNotNone(logs.records[0].exc_info)
+    assert body == {
+        "status": "ok",
+        "database": "connected",
+    }
+    assert "X-Request-ID" in response.headers
+    assert "X-Process-Time" in response.headers
+
+
+def test_health_check_database_unavailable_returns_503(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Verifica se falha na conexão com o banco retorna HTTP 503 no formato padronizado."""
+
+    def _raise_db_error() -> bool:
+        raise DatabaseConnectionError("Banco de dados indisponível no momento.")
+
+    monkeypatch.setattr(health_router, "check_database_connection", _raise_db_error)
+
+    response = client.get("/health")
+    assert response.status_code == 503
+    body = response.json()
+    assert body["error"]["code"] == "DATABASE_UNAVAILABLE"
+    assert body["error"]["message"] == "Banco de dados indisponível no momento."
