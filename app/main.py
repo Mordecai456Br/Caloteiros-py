@@ -135,7 +135,7 @@ async def validation_exception_handler(
         for err in exc.errors()
     ]
     return _error_response(
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         code="VALIDATION_ERROR",
         message="Dados de entrada inválidos.",
         details=sanitized_errors,
