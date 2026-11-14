@@ -1,1 +1,1 @@
-
+Calotiei - Uma API para gerenciar empréstimos pessoais. Após um request de empréstimo aprovado, cria de fato um empréstimo com dados de valor, parcela e data. Automáticamente é feito a criação das parcelas com status em aberto. Associe pagamentos a essas parcelas e quando atingir o valor, mudará para empréstimo ou parcela paga.
