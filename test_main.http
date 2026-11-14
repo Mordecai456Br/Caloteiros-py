@@ -1,11 +1,208 @@
-# Test your FastAPI endpoints
-
-GET http://127.0.0.1:8000/
+# ==========================================
+# HEALTHCHECK
+# ==========================================
+GET http://127.0.0.1:8000/health
 Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/hello/User
+# ==========================================
+# 1. USERS (/users)
+# ==========================================
+
+# Cadastrar usuário
+POST http://127.0.0.1:8000/users
+Content-Type: application/json
+
+{
+  "name": "Maria Silva",
+  "phone": "11999998888",
+  "email": "maria@email.com",
+  "notes": "Cliente indicada"
+}
+
+###
+
+# Listar usuários - filtro por nome
+GET http://127.0.0.1:8000/users?name=Maria
 Accept: application/json
 
 ###
+
+# Listar usuários - busca textual (nome, telefone ou email)
+GET http://127.0.0.1:8000/users?search=Maria
+Accept: application/json
+
+###
+
+# Listar usuários - combinando busca, intervalo de datas, ordenação e paginação
+GET http://127.0.0.1:8000/users?search=Maria&start_date=2026-11-01&end_date=2026-11-30&sort_by=name&order=asc&page=1&limit=20
+Accept: application/json
+
+###
+
+# ==========================================
+# 2. LOAN REQUESTS (/loan-requests)
+# ==========================================
+
+# Criar solicitação de empréstimo (substitua user_id por um UUID válido)
+POST http://127.0.0.1:8000/loan-requests
+Content-Type: application/json
+
+{
+  "user_id": "00000000-0000-0000-0000-000000000000",
+  "request_amount": 1500.00,
+  "pix_key": "11999998888",
+  "installment_count": 3,
+  "first_due_date": "2026-12-10",
+  "description": "Capital de giro"
+}
+
+###
+
+# Filtro por status (pending | approved | denied)
+GET http://127.0.0.1:8000/loan-requests?status=pending
+Accept: application/json
+
+###
+
+# Filtro por user_id
+GET http://127.0.0.1:8000/loan-requests?user_id=00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Filtro por intervalo de datas (inclusivo)
+GET http://127.0.0.1:8000/loan-requests?start_date=2026-11-01&end_date=2026-11-30
+Accept: application/json
+
+###
+
+# Filtro combinado: status + user_id + paginação + ordenação
+GET http://127.0.0.1:8000/loan-requests?status=approved&user_id=00000000-0000-0000-0000-000000000000&sort_by=request_amount&order=desc&page=1&limit=20
+Accept: application/json
+
+###
+
+# Aprovar solicitação (cria automaticamente o Loan e as Installments)
+PATCH http://127.0.0.1:8000/loan-requests/00000000-0000-0000-0000-000000000000/approve
+Content-Type: application/json
+
+{
+  "total_to_receive": 1650.00,
+  "load_date": "2026-11-13",
+  "installment_count": 3,
+  "first_due_date": "2026-12-13",
+  "notes": "Aprovado com 10% de juros"
+}
+
+###
+
+# Negar solicitação
+PATCH http://127.0.0.1:8000/loan-requests/00000000-0000-0000-0000-000000000000/deny
+Accept: application/json
+
+###
+
+# ==========================================
+# 3. LOANS (/loans)
+# ==========================================
+
+# Filtro por user_id
+GET http://127.0.0.1:8000/loans?user_id=00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Filtro por intervalo de datas (load_date)
+GET http://127.0.0.1:8000/loans?start_date=2026-11-01&end_date=2026-11-30
+Accept: application/json
+
+###
+
+# Filtro por intervalo de valores (min_amount e max_amount)
+GET http://127.0.0.1:8000/loans?min_amount=100&max_amount=2000
+Accept: application/json
+
+###
+
+# Filtro por status (active | open | in progress | paid)
+GET http://127.0.0.1:8000/loans?status=active
+Accept: application/json
+
+###
+
+# Filtro completo combinado com ordenação e paginação
+GET http://127.0.0.1:8000/loans?user_id=00000000-0000-0000-0000-000000000000&start_date=2026-11-01&end_date=2026-11-30&min_amount=100&max_amount=2000&status=active&sort_by=principal_amount&order=desc&page=1&limit=20
+Accept: application/json
+
+###
+
+# ==========================================
+# 4. INSTALLMENTS (/installments)
+# ==========================================
+
+# Filtro por loan_id
+GET http://127.0.0.1:8000/installments?loan_id=00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Filtro por parcelas pendentes (open + partially_paid)
+GET http://127.0.0.1:8000/installments?status=pending
+Accept: application/json
+
+###
+
+# Filtro por parcelas em atraso (vencidas e não pagas)
+GET http://127.0.0.1:8000/installments?status=overdue
+Accept: application/json
+
+###
+
+# Filtro por status exato do banco (open | partially_paid | paid)
+GET http://127.0.0.1:8000/installments?status=partially_paid
+Accept: application/json
+
+###
+
+# Filtro por intervalo de vencimento + ordenação + paginação
+GET http://127.0.0.1:8000/installments?start_date=2026-11-01&end_date=2026-11-30&sort_by=due_date&order=asc&page=1&limit=20
+Accept: application/json
+
+###
+
+# ==========================================
+# 5. PAYMENTS (/payments)
+# ==========================================
+
+# Registrar pagamento de uma parcela
+POST http://127.0.0.1:8000/payments
+Content-Type: application/json
+
+{
+  "installment_id": 1,
+  "amount": 550.00,
+  "received_at": "2026-11-13",
+  "receipt_key": " E12345678202611131200",
+  "description": "Pagamento 1ª parcela",
+  "sender_pix_key": "11999998888"
+}
+
+###
+
+# Filtro por installment_id (inteiro)
+GET http://127.0.0.1:8000/payments?installment_id=1
+Accept: application/json
+
+###
+
+# Filtro por loan_id (UUID)
+GET http://127.0.0.1:8000/payments?loan_id=00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+# Filtro por intervalo de datas + ordenação + paginação
+GET http://127.0.0.1:8000/payments?start_date=2026-11-01&end_date=2026-11-30&sort_by=amount&order=desc&page=1&limit=20
+Accept: application/json

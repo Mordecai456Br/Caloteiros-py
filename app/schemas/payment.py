@@ -9,7 +9,7 @@ class PaymentBase(BaseModel):
     installment_id: int
     amount: Decimal = Field(..., gt=0)
     received_at: date | None = None
-    receipt_key: str
+    receipt_key: str | None = None
     description: str | None = None
     sender_pix_key: str
 
